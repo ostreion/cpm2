@@ -10,6 +10,14 @@ cPEPmatch  ─►  Boltz-2  ─►  ProteinHunter
  match)         complex)        refinement)
 ```
 
+## Try it now on Colab
+
+Run pipeline stages 1 to 3 (no MM-GBSA) on a free Google Colab GPU, no local install:
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ostreion/cpm2/blob/main/notebooks/colab/CPM2_colab.ipynb)
+
+You will need a free [Modeller license key](https://salilab.org/modeller/registration.html) (used by stage 1).
+
 ## Quickstart (3 commands)
 
 ```bash
@@ -41,6 +49,7 @@ config list, and output layout: **[QUICKSTART.md](QUICKSTART.md)**.
   (`CPM2_status_report.pptx`), regenerable with `python notebooks/slides/build_deck.py`.
 - **`notebooks/colab/CPM2_colab.ipynb`** — a lean Google Colab notebook to try
   pipeline stages 1 to 3 (no MM-GBSA) on a free-tier GPU.
+  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ostreion/cpm2/blob/main/notebooks/colab/CPM2_colab.ipynb)
 
 ## Citing and acknowledgements
 
