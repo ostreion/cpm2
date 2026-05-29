@@ -1,0 +1,20 @@
+sequences:
+- protein:
+    id: T
+    sequence: SSELFTLTYGALVTQLCKDYENDEDVNKQLDKMGFNIGVRLIEDFLARSNVGRCHDFRETADVIAKVAFKMYLGITPSITNWSPAGDEFSLILENNPLVDFVELPDNHSSLIYSNLLCGVLRGALEMVQMAVEAKFVQDTLKGDGVTEIRMRFIRRIEDNL
+- protein:
+    id: P
+    sequence: XTEALFXXXX
+    cyclic: true
+    msa: empty
+    modifications:
+    - position: 1
+      ccd: DGN
+    - position: 7
+      ccd: DTH
+    - position: 8
+      ccd: DAR
+    - position: 9
+      ccd: DPR
+    - position: 10
+      ccd: DAS

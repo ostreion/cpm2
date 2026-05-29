@@ -1,0 +1,70 @@
+# Ignore external library repositories
+lib/Protein-Hunter/
+lib/boltz/
+lib/cPEPmatch/
+
+# Data folders - excluded from version control
+data/
+archives/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Build / package artifacts
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.snakemake/
+mlruns/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Environment files
+.env
+.venv
+env/
+venv/
+
+# Local workspace — not versioned
+DEV/
+evaluation/
+
+# Per-run benchmark outputs (executed notebooks, run.log, queue logs)
+benchmarks/runs/
+
+# Benchmark per-job MD outputs (multi-GB across all matches) — track shortlists,
+# trajectory_metrics, diagnostics PNGs, scripts, and top-level monitor.log;
+# the per-job working dirs themselves are out of scope for git.
+benchmarks/**/jobs/
+benchmarks/**/niklas_ref/
+
+# Claude Code local scratch (per-session)
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+
+# Marimo build artifacts in notebooks/
+notebooks/__marimo__/
+
+# Built WASM marimo export of triage (source is in notebooks/triage_bundle_src/)
+notebooks/triage_bundle/
+
+# Per-cell __marimo__ build cache inside the bundle src
+notebooks/triage_bundle_src/__marimo__/
+
+# macOS Finder metadata
+.DS_Store
+
+# Niklas comparison set: large bag of candidate PDBs (inputs for retro-render),
+# tracked out-of-band, not in git.
+benchmarks/niklas_07052026_comparison_top_designs/
+logs/

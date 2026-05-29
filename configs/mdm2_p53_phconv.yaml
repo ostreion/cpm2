@@ -1,0 +1,69 @@
+# CPNext run config: ProteinHunter convergence / fixed-point experiment
+# Created: 2026-05-29
+# Cloned from mdm2_p53_v1.yaml. ONLY proteinhunter.num_cycles (10 -> 100) and
+# proteinhunter.num_designs (kept at 4) differ in intent; every other knob is
+# identical to v1 for direct comparability with the 10-cycle prior data.
+#
+# Scientific question: does ProteinHunter find a basin / local minimum in the
+# energy landscape -- does it converge to a self-consistent (sequence,
+# structure) pair by looping LigandMPNN and Boltz? At num_cycles=10 the best
+# ipTM was still climbing (mode at the last cycle), so the loop had not
+# settled. Run to 100 cycles with per-cycle ipTM + per-cycle sequence logged
+# (patch: benchmarks/ph_convergence_20260529/ph_percycle_logging.patch) and
+# 4 independent LigandMPNN trajectories from the SAME Boltz start to separate
+# a true attractor (seeds converge) from a single lucky trajectory (seeds
+# diverge).
+#
+# Match restriction: this experiment is run by re-entering the Snakemake DAG
+# on a pre-seeded run dir that contains the cpepmatch checkpoint + Stage-2
+# Boltz outputs for ONLY the chosen head-to-tail match(es). See
+# benchmarks/ph_convergence_20260529/README.md and setup_run.sh. No fan-out.
+
+run:
+  name: mdm2_p53_phconv
+  notes: |
+    ProteinHunter fixed-point / basin experiment on MDM2/p53 (1YCR).
+    Reuses Stage-2 Boltz output from mdm2_p53_v1_20260512_151124_eb270bad for
+    a single clean HEAD-TO-TAIL match (match18_3av9; optionally match54_7jrh).
+    100 cycles, 4 independent designs, per-cycle ipTM + sequence logged.
+
+# Stage 0 input
+complex_pdb: data/input/1ycr.pdb     # path is resolved relative to PIPELINE_ROOT
+input_target_chain: A                 # MDM2 N-terminal domain
+input_ligand_chain: B                 # p53 TAD peptide (residues 17-29)
+
+# Stage 1: cPEPmatch (identical to v1)
+cpepmatch:
+  motif_size: 4
+  fit_rmsd_threshold: 0.7
+  min_residues: 6
+  max_residues: 22
+  unique_sources: false
+  mutated_only: true
+
+# Stage 2: Boltz-2 (identical to v1)
+boltz:
+  step_scale: 1.5
+  diffusion_samples: 5
+  recycling_steps: 6
+  use_potentials: true
+  seed: 42
+  iptm_threshold: 0.7
+  plddt_threshold: 0.7
+  rmsd_threshold: 2.0
+
+# Stage 3: ProteinHunter -- the experimental stage.
+#   num_cycles 10 -> 100   (run far past where v1 was still climbing)
+#   num_designs 4          (4 independent LigandMPNN trajectories from the
+#                           same Boltz start; cross-seed agreement test)
+# Everything else identical to v1.
+proteinhunter:
+  num_designs: 4
+  num_cycles: 100
+  seed: 42                   # reproducible diffusion + sequence sampling
+  recycling_steps: 6         # match Stage 2
+  diffusion_samples: 3       # >1 reduces per-cycle ipTM noise
+  template_force: true
+  template_force_threshold: 2.0
+  target_msa_path: data/msa_cache/mdm2.csv
+  iptm_threshold: 0.7

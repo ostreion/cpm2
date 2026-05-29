@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cpm2"
+version = "0.1.0"
+description = "CPM2: automated cyclic peptide inhibitor discovery pipeline (cPEPmatch + Boltz2 + ProteinHunter)"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    # MLflow is a first-class runtime dep as of Phase F2: every Snakemake
+    # invocation logs a run. The helpers still no-op gracefully if mlflow
+    # ever fails to import, so this is "expected, not load-bearing".
+    "mlflow>=2.16",
+]
+
+[project.scripts]
+# Thin convenience wrapper around scripts/run.py (see src/cli.py).
+cpm2 = "cpm2.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7",
+    "jupytext>=1.16",
+    "pre-commit>=3",
+    "ruff>=0.6",
+    "snakemake>=8",
+    "papermill>=2.6",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["lib", "archives", "data", "DEV", "evaluation", "Snakefile"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]  # long lines OK in notebooks and prints
+
+[tool.ruff.lint.per-file-ignores]
+# Legacy code that pre-dates the lint config: torch imports come AFTER
+# warnings.filterwarnings() to silence deprecations, and unpacks a few
+# module symbols it doesn't use.
+"src/runners/proteinhunter_refine.py" = ["E402", "F841"]
+
+[tool.setuptools]
+package-dir = { "cpm2" = "src" }
+packages = [
+    "cpm2",
+    "cpm2.boltz",
+    "cpm2.runners",
+    "cpm2.filters",
+    "cpm2.utils",
+    "cpm2.viz",
+]

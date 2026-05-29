@@ -1,0 +1,13 @@
+sequences:
+- protein:
+    id: T
+    sequence: SSELFTLTYGALVTQLCKDYENDEDVNKQLDKMGFNIGVRLIEDFLARSNVGRCHDFRETADVIAKVAFKMYLGITPSITNWSPAGDEFSLILENNPLVDFVELPDNHSSLIYSNLLCGVLRGALEMVQMAVEAKFVQDTLKGDGVTEIRMRFIRRIEDNL
+- protein:
+    id: P
+    sequence: CEALFALHNLC
+    cyclic: false
+    msa: empty
+constraints:
+- bond:
+    atom1: [P, 1, SG]
+    atom2: [P, 11, SG]

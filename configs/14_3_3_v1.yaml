@@ -1,0 +1,57 @@
+# CPNext run config: 14-3-3 zeta/delta + Cdc25C, parameter set v1
+# Created: 2026-05-07
+# Notes:
+#   3rd benchmark target. Tests phosphopeptide-in-beta-groove geometry,
+#   genuinely different from helix-in-pocket (MDM2, Bcl-XL). Stress-test
+#   for the helix-bias claim from the 2026-05-07 journal.
+#   Reference Kd values:
+#     - Natural PPI: 5m36 14-3-3 zeta/delta + Cdc25C peptide, Kd=2.75 uM
+#       (other PP partners span 0.33 nM -> 350 uM)
+#     - Cyclic peptide: 4n7y Kd=0.55 uM (11-mer), 5j31 Kd=0.31 uM (10-mer)
+
+run:
+  name: 14_3_3_v1
+  notes: |
+    14-3-3 zeta/delta benchmark with Cdc25C phosphopeptide partner.
+    Different binding mode than MDM2/Bcl-XL (peptide-in-groove, not
+    helix-in-pocket). Compare top-N CPs against 4n7y (0.55 uM) and 5j31
+    (0.31 uM); natural Cdc25C reference Kd 2.75 uM.
+
+# Stage 0 input: 5m36 (14-3-3 zeta/delta + Cdc25C peptide)
+# 5m36 ASU has two binding pairs: A<->D (9-mer) and B<->C (20-mer Cdc25C).
+# Chains A and C do NOT contact each other (0 atoms within 8 A) -- using
+# A+C produces an empty interface and crashes cPEPmatch with
+# "Atomsel must be valid" (lib/cPEPmatch atomsel of empty selection).
+# Use B<->C: the 20-mer peptide gives more backbone for matching and fits
+# the cpepmatch min/max residue window (6..22). A<->D is only 9 residues.
+complex_pdb: data/input/5m36.pdb
+input_target_chain: B   # 14-3-3 zeta/delta (chain B is the partner of C)
+input_ligand_chain: C   # Cdc25C phosphopeptide (20 res, contains SEP)
+
+cpepmatch:
+  motif_size: 4
+  fit_rmsd_threshold: 0.7
+  min_residues: 6
+  max_residues: 22
+  unique_sources: false
+  mutated_only: true
+
+boltz:
+  step_scale: 1.5
+  diffusion_samples: 5
+  recycling_steps: 6
+  use_potentials: true
+  seed: 42
+  iptm_threshold: 0.7
+  plddt_threshold: 0.7
+  rmsd_threshold: 2.0
+
+proteinhunter:
+  num_designs: 4
+  num_cycles: 10
+  recycling_steps: 6
+  diffusion_samples: 3
+  template_force: true
+  template_force_threshold: 2.0
+  target_msa_path: data/msa_cache/14-3-3-zd.csv
+  iptm_threshold: 0.7

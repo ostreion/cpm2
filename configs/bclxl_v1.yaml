@@ -1,0 +1,49 @@
+# CPNext run config: Bcl-XL / Bad benchmark, parameter set v1
+# Created: 2026-05-07
+# Notes:
+#   2nd benchmark target. Bcl-XL is a classic "undruggable" PPI in apoptosis;
+#   the natural ligand Bad (a BH3-only protein) docks as a helix into the
+#   Bcl-XL groove (geometrically similar to MDM2/p53). Reference Kd values:
+#     - Natural PPI: 1g5j Bcl-XL + Bad 25-mer peptide, Kd=0.6 nM (Petros, NMR)
+#     - Cyclic peptide: 2yq6 (18 residues, 16 in CPSet) Kd=45 nM
+#   Same parameter set as mdm2_p53_v1 (helical-binder-in-pocket geometry).
+
+run:
+  name: bclxl_v1
+  notes: |
+    Bcl-XL/Bad benchmark. Same param set as mdm2_p53_v1 (helix-in-pocket).
+    Compare top-N CPs against known cyclic binder 2yq6 (Kd 45 nM) and
+    natural Bad peptide partner (Kd 0.6 nM).
+
+# Stage 0 input: 1g5j (Bcl-XL bound to 25-mer Bad peptide; NMR ensemble)
+complex_pdb: data/input/1g5j.pdb
+input_target_chain: A   # Bcl-XL (175 res)
+input_ligand_chain: B   # Bad peptide (25 res)
+
+cpepmatch:
+  motif_size: 4
+  fit_rmsd_threshold: 0.7
+  min_residues: 6
+  max_residues: 22
+  unique_sources: false
+  mutated_only: true
+
+boltz:
+  step_scale: 1.5
+  diffusion_samples: 5
+  recycling_steps: 6
+  use_potentials: true
+  seed: 42
+  iptm_threshold: 0.7
+  plddt_threshold: 0.7
+  rmsd_threshold: 2.0
+
+proteinhunter:
+  num_designs: 4
+  num_cycles: 10
+  recycling_steps: 6
+  diffusion_samples: 3
+  template_force: true
+  template_force_threshold: 2.0
+  target_msa_path: data/msa_cache/bclxl.csv
+  iptm_threshold: 0.7

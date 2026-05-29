@@ -1,0 +1,59 @@
+# CPNext run config: MDM2 / p53 benchmark, parameter set v1
+# Created: 2026-05-07
+# Notes:
+#   First run on the MDM2/p53 PPI benchmark (1YCR). Uses the parameter set
+#   agreed in the 2026-04-29 + 2026-05-07 journal entries: tuned for the
+#   "small target, helical peptide-in-pocket, ~50 CPs from cPEPmatch" regime.
+#   Goal: produce ~50 CP suggestions through Stage 1, score them with Boltz-2
+#   at low ipTM noise, refine with ProteinHunter.
+
+run:
+  name: mdm2_p53_v1
+  notes: |
+    First MDM2/p53 benchmark run. Parameters from 2026-05-07 journal.
+    Compare top-N CPs against known cyclic binders 2axi (IC50 0.14 uM),
+    3v3b (Kd 55 nM), 5vk0 (Kd 0.18 nM), and natural partner p53 TAD (Kd ~0.1 uM).
+
+# Stage 0 input
+complex_pdb: data/input/1ycr.pdb     # path is resolved relative to PIPELINE_ROOT
+input_target_chain: A                 # MDM2 N-terminal domain
+input_ligand_chain: B                 # p53 TAD peptide (residues 17-29)
+
+# Stage 1: cPEPmatch (defaults; loosen fit_rmsd_threshold if <50 hits)
+cpepmatch:
+  motif_size: 4
+  fit_rmsd_threshold: 0.7
+  min_residues: 6
+  max_residues: 22
+  unique_sources: false
+  mutated_only: true
+
+# Stage 2: Boltz-2 (parameter overrides from 2026-05-07 audit)
+boltz:
+  # Quality knobs
+  step_scale: 1.5            # Boltz-2 native default; was 1.638 (Boltz-1 leak)
+  diffusion_samples: 5       # variance reduction on ipTM ranking
+  recycling_steps: 6         # AF3 preset is 10; 6 is the cost/quality knee
+  use_potentials: true       # cleaner cyclic backbones (clash + closure)
+  seed: 42                   # reproducible diffusion trajectories
+  # Filter thresholds
+  iptm_threshold: 0.7
+  plddt_threshold: 0.7
+  rmsd_threshold: 2.0        # tighter; AfCycDesign reports <1.0 A on designed cyclics
+
+# Stage 3: ProteinHunter
+proteinhunter:
+  num_designs: 4             # double the parallel exploration vs default 2
+  num_cycles: 10
+  seed: 42                   # reproducible diffusion + sequence sampling
+  recycling_steps: 6         # match Stage 2
+  diffusion_samples: 3       # was hardcoded 1; >1 reduces per-cycle ipTM noise
+  template_force: true
+  template_force_threshold: 2.0  # default 1.0 too tight for unrestrained Boltz output
+  target_msa_path: data/msa_cache/mdm2.csv
+  iptm_threshold: 0.7
+
+# All previously deferred code-level issues are now patched:
+#   - boltz.seed plumbed through BoltzPredictConfig
+#   - proteinhunter.diffusion_samples surfaced (was hardcoded =1)
+#   - proteinhunter.target_msa_path replaces the "empty" MSA for target chain

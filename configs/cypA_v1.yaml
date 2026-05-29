@@ -1,0 +1,54 @@
+# CPNext run config: Cyclophilin A + HIV-1 capsid, parameter set v1
+# Created: 2026-05-07
+# Notes:
+#   4th benchmark target. Tests proline-rich / enzyme-PPI binding mode.
+#   Note caveat: the natural binder (HIV-1 capsid N-term domain, 146 res)
+#   is a folded domain not a peptide, so cPEPmatch will mostly find
+#   short backbone matches at the proline-rich interface loop. Still a
+#   real PPI with measured Kd, drug-target relevance high (immunosuppressants).
+#   Reference Kd values:
+#     - Natural PPI: 2x2d CypA + HIV-1 N-term capsid, Kd=6.1 uM
+#       (also 1ak4 Kd=17 uM, 2xgy Kd=30 uM)
+#     - Cyclic peptide: 3odi Kd=15 nM (11-mer), 3odl Kd=61 nM (11-mer)
+
+run:
+  name: cypA_v1
+  notes: |
+    Cyclophilin A / HIV-1 capsid benchmark. Tests proline-rich enzyme
+    binding mode. Caveat: natural ligand is a folded domain, not a peptide,
+    so Stage 1 hit count may be lower than MDM2/Bcl-XL/14-3-3.
+    Compare top-N CPs against 3odi (15 nM), 3odl (61 nM); natural HIV
+    capsid reference Kd 6.1 uM.
+
+# Stage 0 input: 2x2d (CypA + HIV-1 capsid N-term domain)
+complex_pdb: data/input/2x2d.pdb
+input_target_chain: C   # Cyclophilin A (163 res); chain B is duplicate
+input_ligand_chain: D   # HIV-1 capsid p24 N-term domain (146 res)
+
+cpepmatch:
+  motif_size: 4
+  fit_rmsd_threshold: 0.7
+  min_residues: 6
+  max_residues: 22
+  unique_sources: false
+  mutated_only: true
+
+boltz:
+  step_scale: 1.5
+  diffusion_samples: 5
+  recycling_steps: 6
+  use_potentials: true
+  seed: 42
+  iptm_threshold: 0.7
+  plddt_threshold: 0.7
+  rmsd_threshold: 2.0
+
+proteinhunter:
+  num_designs: 4
+  num_cycles: 10
+  recycling_steps: 6
+  diffusion_samples: 3
+  template_force: true
+  template_force_threshold: 2.0
+  target_msa_path: data/msa_cache/cypA.csv
+  iptm_threshold: 0.7

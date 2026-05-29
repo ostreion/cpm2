@@ -1,0 +1,87 @@
+# CPNext run config: MDM2 / p53 cPEPmatch SENSITIVITY benchmark
+# Created: 2026-05-29
+# Derived from: mdm2_p53_v1.yaml (identical except the Stage-1 cPEPmatch gates).
+#
+# Scientific question
+#   How much does cPEPmatch's interface-mimicry seed actually move the needle?
+#   i.e. does the geometric quality of the cPEPmatch match (its fit-RMSD to the
+#   target interface) propagate to final design quality (Boltz ipTM / PH ipTM),
+#   or does ProteinHunter rescue even poor geometric matches?
+#
+# What changed vs v1 (and ONLY this):
+#   Stage 1 cPEPmatch gates are loosened to admit a WIDE fit-RMSD range so we
+#   can sample genuinely poor geometric matches alongside the tight v1-quality
+#   ones. Two knobs, two different gates (see cpm2/critique_2026-04-23.md 4.1):
+#
+#     frmsd_threshold   -> cPEPmatch CLI -ft. Despite the name, this gates the
+#                          Cα DISTANCE-VECTOR RMSD (Dist-RMSD) inside
+#                          backbone_match.find_match (`if rmsd < frmsd_threshold`).
+#                          v1/CPNext default 0.3; paper range 0.3-1.5. Loosening
+#                          this is what actually ADMITS poorer geometric matches
+#                          into the candidate pool.
+#     fit_rmsd_threshold-> CPM2 post-hoc filter on the true 3D-superposition
+#                          Fit-RMSD (last column of match_list.txt). v1 = 0.7.
+#                          Loosening this is what KEEPS the high-fit-RMSD matches
+#                          after superposition; the user's framing ("take the
+#                          highest fit-RMSD matches by loosening the threshold")
+#                          maps primarily to THIS knob.
+#
+#   Both must be loosened together: frmsd alone widens the Dist-RMSD pool but the
+#   0.7 post-hoc fit gate would still cull the poor poses; fit alone keeps poor
+#   poses but the 0.3 Dist-RMSD gate never lets them through in the first place.
+#
+# Cost control: this config enumerates MANY matches at Stage 1. We do NOT run
+# Boltz+PH on all of them. The setup step (scripts/select_matches.py) runs Stage 1
+# only, picks ~12-15 matches SPANNING the fit-RMSD axis, stages exactly those into
+# 1_cpepmatch_renamed/, then the DAG is resumed and fans out Stage 2+3 only on the
+# staged subset. See benchmarks/cpepmatch_sensitivity_20260529/README.md.
+
+run:
+  name: mdm2_p53_sens
+  notes: |
+    cPEPmatch fit-RMSD sensitivity sweep on MDM2/p53 (1YCR). Stage-1 gates
+    loosened (frmsd_threshold 0.3->1.5, fit_rmsd_threshold 0.7->3.0) to admit
+    poor geometric matches; a controlled ~12-15 match subset spanning the
+    fit-RMSD axis is run through Boltz-2 + ProteinHunter. Everything else
+    identical to mdm2_p53_v1. Decision criterion: strong negative correlation
+    of final ipTM vs seed fit-RMSD => cPEPmatch geometric precision is
+    load-bearing; flat => ProteinHunter rescues anything.
+
+# Stage 0 input (identical to v1)
+complex_pdb: data/input/1ycr.pdb     # path is resolved relative to PIPELINE_ROOT
+input_target_chain: A                 # MDM2 N-terminal domain
+input_ligand_chain: B                 # p53 TAD peptide (residues 17-29)
+
+# Stage 1: cPEPmatch  -- the ONLY variable vs v1
+cpepmatch:
+  motif_size: 4                # identical to v1
+  interface_cutoff: 5          # identical to v1 (explicit; was the default)
+  frmsd_threshold: 1.5         # LOOSENED from 0.3 (Dist-RMSD gate; paper max)
+  fit_rmsd_threshold: 3.0      # LOOSENED from 0.7 (post-hoc 3D Fit-RMSD gate)
+  min_residues: 6              # identical to v1
+  max_residues: 22             # identical to v1
+  unique_sources: false        # identical to v1
+  mutated_only: true           # identical to v1
+
+# Stage 2: Boltz-2 (IDENTICAL to v1)
+boltz:
+  step_scale: 1.5
+  diffusion_samples: 5
+  recycling_steps: 6
+  use_potentials: true
+  seed: 42
+  iptm_threshold: 0.7
+  plddt_threshold: 0.7
+  rmsd_threshold: 2.0
+
+# Stage 3: ProteinHunter (IDENTICAL to v1)
+proteinhunter:
+  num_designs: 4
+  num_cycles: 10
+  seed: 42
+  recycling_steps: 6
+  diffusion_samples: 3
+  template_force: true
+  template_force_threshold: 2.0
+  target_msa_path: data/msa_cache/mdm2.csv
+  iptm_threshold: 0.7

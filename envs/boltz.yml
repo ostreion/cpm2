@@ -1,0 +1,29 @@
+name: boltz
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - python=3.10
+  - numpy>=1.26
+  - pandas
+  - scipy
+  - matplotlib
+  - biopython
+  - rdkit
+  - jupyter
+  - jupyterlab
+  - ipywidgets
+  - nglview
+  - pyyaml
+  - pip
+  - pip:
+    - boltz>=2.2
+    - torch>=2.0
+    - pytorch-lightning
+    - einops
+    - hydra-core
+    - omegaconf
+    - wandb
+    - tqdm
+    - gemmi
+    - ProDy

@@ -1,0 +1,30 @@
+name: cpm2
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  # Scientific stack used by the pipeline orchestrator (notebook + helpers)
+  - biopython>=1.84
+  - gemmi>=0.6
+  - numpy>=1.26
+  - pandas>=2.0
+  - matplotlib>=3.8
+  - plotly>=5.20
+  - pyyaml>=6
+  # Notebook UI
+  - jupyterlab>=4
+  - ipykernel>=7
+  - ipywidgets>=8
+  - jupyter_server>=2
+  - nbconvert>=7
+  - pip
+  - pip:
+      # Notebook-only viz; not in pyproject because it's notebook-specific.
+      - py2Dmol
+
+# After `conda env create -f envs/cpm2.yml`, install the package + dev tools:
+#   conda activate cpm2
+#   pip install -e ".[dev]"
+#   pre-commit install
+# The dev extras pull in snakemake, mlflow, papermill, jupytext, pre-commit,
+# ruff, pytest, and the pulp pin (snakemake 7.x compatibility).

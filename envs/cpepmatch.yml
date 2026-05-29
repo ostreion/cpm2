@@ -1,0 +1,17 @@
+name: cpepmatch
+channels:
+  - conda-forge
+  - salilab
+dependencies:
+  - python=3.10
+  - numpy>=1.26
+  - pandas
+  - scipy
+  - matplotlib-base
+  - biopython
+  - rdkit
+  - modeller
+  - pip
+  - pip:
+    - MDAnalysis
+    - tqdm
